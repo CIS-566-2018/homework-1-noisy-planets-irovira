@@ -54,7 +54,7 @@ function main() {
 
   gui.addColor(controls, 'color');
   // Choose from accepted values
-  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'texture'] );
+  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'noise'] );
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -85,9 +85,9 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/test-frag.glsl')),
   ]);
 
-  const texture = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/texture-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/texture-frag.glsl')),
+  const noise = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/noise-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
   ]);
 
   rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
@@ -121,25 +121,15 @@ function main() {
       //square,
       cube,
       ]);
-    } else if(controls.shader === 'texture'){
-      lambert.setGeometryColor(currColor);
-      renderer.render(camera, lambert, [
+    } else if(controls.shader === 'noise'){
+      noise.setGeometryColor(currColor);
+      renderer.render(camera, noise, [
       //icosphere,
       //square,
       cube,
       ]);
     }
     
-
-    // test.setTime(controls.time);
-    // lambert.setGeometryColor(currColor);
-    
-
-    // renderer.render(camera, rainbow, [
-    //   icosphere,
-    //   //square,
-    //   cube,
-    // ]);
     stats.end();
 
     controls.time += 0.01;
