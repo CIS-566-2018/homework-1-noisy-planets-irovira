@@ -32,22 +32,61 @@ out vec3 fs_Pos;
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
-
+vec3 random3( vec3 p ) {
+    return fract(sin(vec3(dot(p,vec3(127.1,311.7,239.1)),dot(p,vec3(269.5,183.3,329.1)),dot(p,vec3(350.5,270.3,183.1))))*43758.5453);//sin(vec3(dot(p,vec3(127.1,311.7,239.1))),);
+    //fract(sin(vec3(dot(p,vec3(127.1,311.7,239.1)),dot(p,vec3(269.5,183.3,329.1),dot(p,vec3(350.5,270.3,183.1))))*43758.5453);
+}
 
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
-    fs_Pos = vs_Pos.xyz;
-    
+    fs_Pos = vs_Pos.xyz;                    //pass vertex position to fragment shader
+
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
                                                             // Transform the geometry's normals by the inverse transpose of the
                                                             // model matrix. This is necessary to ensure the normals remain
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
+    
+    vec3 st = vs_Pos.xyz;
+    vec3 worleyFactor = vec3(.0);
+
+    // Scale
+    st *= 5.;
+
+    // Tile the space
+    vec3 i_st = floor(st);//vec2 i_st = floor(st);
+    vec3 f_st = fract(st);//vec2 f_st = fract(st);
+
+    float m_dist = 1.;  // minimun distance
+
+    for (int y= -1; y <= 1; y ++) {
+        for (int x= -1; x <= 1; x ++) {
+            for(int z = -1; z<=1; z++){
+                vec3 neighbor = vec3(float(x),float(y),float(z));
+             // Random position from current + neighbor place in the grid
+                vec3 point = random3(i_st + neighbor);
+            // Vector between the pixel and the point
+                vec3 diff = neighbor + point - f_st;
+            // Distance to the point
+                float dist = length(diff);
+            // Keep the closer distance
+                m_dist = min(m_dist, dist);
+            }
+        }
+    }
+    
+    // Draw the min distance (distance field)
+    worleyFactor += m_dist;
+
+    // Draw cell center
+    worleyFactor += 1.-step(.02, m_dist);
+
+    float wF = 1. - length(worleyFactor);
 
 
-    vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
+    vec4 modelposition = u_Model * (vs_Pos + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
