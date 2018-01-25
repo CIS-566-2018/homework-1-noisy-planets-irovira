@@ -54,7 +54,7 @@ function main() {
 
   gui.addColor(controls, 'color');
   // Choose from accepted values
-  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'noise'] );
+  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'noise', 'perlin'] );
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -90,8 +90,14 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
   ]);
 
+  const perlin = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/perlin-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/perlin-frag.glsl')),
+  ]);
+
   rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
   noise.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+  perlin.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
 
   // const rainbow = new ShaderProgram([
   //   new Shader(gl.VERTEX_SHADER, require('./shaders/rainbow-vert.glsl')),
@@ -129,6 +135,13 @@ function main() {
       //square,
       //cube,
       ]);
+    } else if(controls.shader === 'perlin'){
+      perlin.setGeometryColor(currColor);
+      renderer.render(camera, perlin, [
+      icosphere,
+      //square,
+      //cube,
+      ]);
     }
     
     stats.end();
@@ -143,6 +156,7 @@ function main() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
     noise.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+    perlin.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
     camera.setAspectRatio(window.innerWidth / window.innerHeight);
     camera.updateProjectionMatrix();
   }, false);

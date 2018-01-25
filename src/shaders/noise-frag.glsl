@@ -22,50 +22,47 @@ uniform vec2 u_Resolution;
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
+in vec3 fs_Pos;
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
 //  Function from Iñigo Quiles
 //  https://www.shadertoy.com/view/MsS3Wc
-vec3 hsb2rgb( in vec3 c ){
-    vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
-                             6.0)-3.0)-1.0,0.0,1.0 );
-    rgb = rgb*rgb*(3.0-2.0*rgb);
-    return c.z * mix( vec3(1.0), rgb, c.y);
-}
-
-vec2 random2( vec2 p ) {
-    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
+vec3 random3( vec3 p ) {
+    return fract(sin(vec3(dot(p,vec3(127.1,311.7,239.1)),dot(p,vec3(269.5,183.3,329.1)),dot(p,vec3(350.5,270.3,183.1))))*43758.5453);//sin(vec3(dot(p,vec3(127.1,311.7,239.1))),);
+    //fract(sin(vec3(dot(p,vec3(127.1,311.7,239.1)),dot(p,vec3(269.5,183.3,329.1),dot(p,vec3(350.5,270.3,183.1))))*43758.5453);
 }
 
 
 void main()
 {
-    vec2 st = gl_FragCoord.xy/u_Resolution.xy;
-    st.x *= u_Resolution.x/u_Resolution.y;
+    vec3 st = fs_Pos;//vec2 st = gl_FragCoord.xy/u_Resolution.xy;
+    //st.x *= u_Resolution.x/u_Resolution.y;
     vec3 color = vec3(.0);
 
     // Scale
-    st *= 3.;
+    st *= 5.;
 
     // Tile the space
-    vec2 i_st = floor(st);
-    vec2 f_st = fract(st);
+    vec3 i_st = floor(st);//vec2 i_st = floor(st);
+    vec3 f_st = fract(st);//vec2 f_st = fract(st);
 
     float m_dist = 1.;  // minimun distance
 
     for (int y= -1; y <= 1; y ++) {
         for (int x= -1; x <= 1; x ++) {
-            vec2 neighbor = vec2(float(x),float(y));
+            for(int z = -1; z<=1; z++){
+                vec3 neighbor = vec3(float(x),float(y),float(z));
              // Random position from current + neighbor place in the grid
-            vec2 point = random2(i_st + neighbor);
+                vec3 point = random3(i_st + neighbor);
             // Vector between the pixel and the point
-            vec2 diff = neighbor + point - f_st;
+                vec3 diff = neighbor + point - f_st;
             // Distance to the point
-            float dist = length(diff);
+                float dist = length(diff);
             // Keep the closer distance
-            m_dist = min(m_dist, dist);
+                m_dist = min(m_dist, dist);
+            }
         }
     }
     
@@ -76,10 +73,11 @@ void main()
     color += 1.-step(.02, m_dist);
 
 //     // Draw grid
-    color.r += step(.98, f_st.x) + step(.98, f_st.y);
+    //color.r += step(.98, f_st.x) + step(.98, f_st.y);
 
     // Show isolines
     color -= step(.7,abs(sin(27.0*m_dist)))*.5;
+    
     out_Col = vec4(color,1.0);
 }
 
