@@ -91,6 +91,7 @@ function main() {
   ]);
 
   rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+  noise.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
 
   // const rainbow = new ShaderProgram([
   //   new Shader(gl.VERTEX_SHADER, require('./shaders/rainbow-vert.glsl')),
@@ -117,16 +118,16 @@ function main() {
     } else if(controls.shader === 'lambert'){
       lambert.setGeometryColor(currColor);
       renderer.render(camera, lambert, [
-      //icosphere,
+      icosphere,
       //square,
-      cube,
+      //cube,
       ]);
     } else if(controls.shader === 'noise'){
       noise.setGeometryColor(currColor);
       renderer.render(camera, noise, [
-      //icosphere,
+      icosphere,
       //square,
-      cube,
+      //cube,
       ]);
     }
     
@@ -141,6 +142,7 @@ function main() {
   window.addEventListener('resize', function() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+    noise.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
     camera.setAspectRatio(window.innerWidth / window.innerHeight);
     camera.updateProjectionMatrix();
   }, false);
