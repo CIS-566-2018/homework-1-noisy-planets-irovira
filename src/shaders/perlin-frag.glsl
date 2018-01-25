@@ -38,22 +38,19 @@ vec3 hsb2rgb( in vec3 c ){
 void main()
 {
     // Material base color (before shading)
+        vec4 diffuseColor = u_Color;
 
-    //Rainbow Shader based on Book of Shaders
-    //https://thebookofshaders.com/06/
-    
-        vec3 color = vec3(0.0);
-        vec2 st = gl_FragCoord.xy /u_Resolution;
-        vec2 center = vec2(0.5);
-        vec2 toCenter = vec2(0.5) - st;
-        float angle = atan(toCenter.y,toCenter.x) + u_Time; //added time animation
-        float radius = length(toCenter)*2.0;
-
+        // Calculate the diffuse term for Lambert shading
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
         // Avoid negative lighting values
-        color = hsb2rgb(vec3((angle/TWO_PI)+0.5,radius,1.0));
+        // diffuseTerm = clamp(diffuseTerm, 0, 1);
+
         float ambientTerm = 0.2;
 
-        float lightIntensity = diffuseTerm + ambientTerm; 
-        out_Col = vec4(color * lightIntensity,1.0);
+        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
+                                                            //to simulate ambient lighting. This ensures that faces that are not
+                                                            //lit by our point light are not completely black.
+
+        // Compute final shaded color
+        out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
 }

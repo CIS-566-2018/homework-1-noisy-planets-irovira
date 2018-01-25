@@ -18,7 +18,7 @@ const controls = {
   //'test' : test, 
   color: [255.0,0.0,0.0,1.0],
   time: 0.0,
-  shader: 'lambert',
+  shader: 'striped',
 };
 
 let icosphere: Icosphere;
@@ -54,7 +54,7 @@ function main() {
 
   gui.addColor(controls, 'color');
   // Choose from accepted values
-  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'noise', 'perlin'] );
+  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'striped', 'perlin'] );
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -85,9 +85,9 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/test-frag.glsl')),
   ]);
 
-  const noise = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/noise-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
+  const striped = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/striped-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/striped-frag.glsl')),
   ]);
 
   const perlin = new ShaderProgram([
@@ -96,7 +96,7 @@ function main() {
   ]);
 
   rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
-  noise.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+  striped.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
   perlin.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
 
   // const rainbow = new ShaderProgram([
@@ -128,9 +128,9 @@ function main() {
       //square,
       //cube,
       ]);
-    } else if(controls.shader === 'noise'){
-      noise.setGeometryColor(currColor);
-      renderer.render(camera, noise, [
+    } else if(controls.shader === 'striped'){
+      striped.setGeometryColor(currColor);
+      renderer.render(camera, striped, [
       icosphere,
       //square,
       //cube,
@@ -155,7 +155,7 @@ function main() {
   window.addEventListener('resize', function() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
-    noise.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+    striped.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
     perlin.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
     camera.setAspectRatio(window.innerWidth / window.innerHeight);
     camera.updateProjectionMatrix();

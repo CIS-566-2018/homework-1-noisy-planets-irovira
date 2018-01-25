@@ -53,7 +53,7 @@ void main()
     vec3 worleyFactor = vec3(.0);
 
     // Scale
-    st *= 5.;
+    st *= 1.;
 
     // Tile the space
     vec3 i_st = floor(st);//vec2 i_st = floor(st);
@@ -81,9 +81,10 @@ void main()
     worleyFactor += m_dist;
 
     // Draw cell center
-    worleyFactor += 1.-step(.02, m_dist);
+    worleyFactor += 1.-step(.02, m_dist); 
 
-    float wF = 1. - length(worleyFactor);
+    float wF = 1. - length(worleyFactor); //zebra fish
+    //float wF = length(worleyFactor); //a very interesting...glass...sculpture..?
 
 
     vec4 modelposition = u_Model * (vs_Pos + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below

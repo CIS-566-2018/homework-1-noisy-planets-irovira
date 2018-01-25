@@ -42,7 +42,7 @@ void main()
     vec3 color = vec3(.0);
 
     // Scale
-    st *= 5.;
+    st *= 1.;
 
     // Tile the space
     vec3 i_st = floor(st);//vec2 i_st = floor(st);
@@ -77,7 +77,21 @@ void main()
 
     // Show isolines
     color -= step(.7,abs(sin(27.0*m_dist)))*.5;
+    // Calculate the diffuse term for Lambert shading
+    float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+    float ambientTerm = 0.2;
+
+    float lightIntensity = diffuseTerm + ambientTerm; 
+
+    vec3 stripe = vec3(0.);
+    if(length(color) >= 0.5){
+        //lime green = 50-205-50
+        stripe = vec3(50. / 255.,205. / 255.,50. / 255.);
+    } else {
+        //dark violet = 	148-0-211
+        stripe = vec3(148. / 255.,0. / 255.,211. / 255.);
+    }
+    out_Col = vec4(stripe.rgb * lightIntensity, 1.0);
     
-    out_Col = vec4(color,1.0);
 }
 
