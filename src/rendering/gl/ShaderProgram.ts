@@ -33,6 +33,7 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifResolution: WebGLUniformLocation;
+  unifWorleyScale: WebGLUniformLocation;
 
 
   constructor(shaders: Array<Shader>) {
@@ -55,6 +56,7 @@ class ShaderProgram {
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime     = gl.getUniformLocation(this.prog, "u_Time");
     this.unifResolution     = gl.getUniformLocation(this.prog, "u_Resolution");
+    this.unifWorleyScale     = gl.getUniformLocation(this.prog, "u_WorleyScale");
   }
 
   use() {
@@ -104,6 +106,13 @@ class ShaderProgram {
     this.use();
     if (this.unifResolution !== -1) {
       gl.uniform2fv(this.unifResolution, resolution);
+    }
+  }
+
+  setWorleyScale(worleyScale: number) {
+    this.use();
+    if (this.unifWorleyScale !== -1) {
+      gl.uniform1f(this.unifWorleyScale, worleyScale);
     }
   }
 

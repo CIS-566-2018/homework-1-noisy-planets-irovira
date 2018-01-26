@@ -31,6 +31,8 @@ out vec4 fs_Nor;            // The array of normals that has been transformed by
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
 out vec3 fs_Pos;
+out float fs_Type;
+
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
@@ -45,9 +47,62 @@ vec3 random3( vec3 p ) {
 	return r-0.5;
 }
 
+float surflet(vec3 P, vec3 gridPoint)
+{
+    // Compute falloff function by converting linear distance to a polynomial
+    float distX = abs(P.x - gridPoint.x);
+    float distY = abs(P.y - gridPoint.y);
+    float distZ = abs(P.z - gridPoint.z);
+    float tX = 1. - 6. * pow(distX, 5.0) + 15. * pow(distX, 4.0) - 10. * pow(distX, 3.0);
+    float tY = 1. - 6. * pow(distY, 5.0) + 15. * pow(distY, 4.0) - 10. * pow(distY, 3.0);
+    float tZ = 1. - 6. * pow(distZ, 5.0) + 15. * pow(distZ, 4.0) - 10. * pow(distZ, 3.0);
+
+    // Get the random vector for the grid point
+    vec3 gradient = random3(gridPoint);
+    // Get the vector from the grid point to P
+    vec3 diff = P - gridPoint;
+    // Get the value of our height field by dotting grid->P with our gradient
+    float height = dot(diff, gradient);
+    // Scale our height field (i.e. reduce it) by our polynomial falloff function
+    return height * tX * tY * tZ;
+}
+
+float PerlinNoise(vec3 p)
+{
+    // Tile the space
+    vec3 pXLYLZL = floor(p);
+    //top face
+    vec3 pXHYLZH = pXLYLZL + vec3(1.,0.,1.);
+    vec3 pXHYHZH = pXLYLZL + vec3(1.,1.,1.);
+    vec3 pXLYHZH = pXLYLZL + vec3(0.,1.,1.);
+    vec3 pXLYLZH = pXLYLZL + vec3(0.,0.,1.);
+    //bottom face
+    vec3 pXHYLZL = pXLYLZL + vec3(1.,0.,0.);
+    vec3 pXHYHZL = pXLYLZL + vec3(1.,1.,0.);
+    vec3 pXLYHZL = pXLYLZL + vec3(0.,1.,0.);
+
+    return surflet(p, pXLYLZL) + surflet(p, pXHYLZL) + surflet(p, pXHYHZL) + surflet(p,  pXLYHZL) +
+    surflet(p, pXHYLZH) + surflet(p, pXHYHZH) + surflet(p, pXLYHZH) + surflet(p, pXLYLZH);
+}
+
+vec3 PixelToGrid(vec3 pixel, float size)
+{
+    //vec3 uv = pixel.xy / u_Dimensions.xy;
+    // Account for aspect ratio
+    vec3 uv = vec3(0.);
+    vec3 dim = vec3(size);
+    uv = pixel;// / dim;
+    // Determine number of cells (NxN)
+    uv *= size;
+
+    return uv;
+}
+
+//#define WORLEY
+#define NORMAL
 void main()
 {
-    fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    //fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
     fs_Pos = vs_Pos.xyz;                    //pass vertex position to fragment shader
 
     mat3 invTranspose = mat3(u_ModelInvTr);
@@ -73,7 +128,7 @@ void main()
     vec3 f_st = fract(st);//vec2 f_st = fract(st);
 
     float m_dist = 1.;  // minimun distance
-
+    vec3 minNeighbor = vec3(0.);
     for (int y= -1; y <= 1; y ++) {
         for (int x= -1; x <= 1; x ++) {
             for(int z = -1; z<=1; z++){
@@ -85,25 +140,52 @@ void main()
             // Distance to the point
                 float dist = length(diff);
             // Keep the closer distance
+                if(dist < m_dist){
+                    minNeighbor = neighbor;
+                }
                 m_dist = min(m_dist, dist);
             }
         }
     }
+    float biome = 0.;
+    if(minNeighbor.r == 1. && minNeighbor.b == 0.){
+        biome = 2.;
+    } else if (minNeighbor.g == 1. && minNeighbor.b == 1. && minNeighbor.r ==1.){
+        biome = 1.;
+    }
     
-    // Draw the min distance (distance field)
-    worleyFactor += m_dist;
+    vec4 modelposition = vec4(0.);
+
+    if(biome == 1.){
+         // Draw the min distance (distance field)
+        worleyFactor += m_dist;
 
     // Draw cell center
-    worleyFactor += 1.-step(.02, m_dist); 
+        worleyFactor += 1.-step(.02, m_dist); 
 
-    float wF = 1. - length(worleyFactor); //zebra fish
+        float wF = 1. - length(worleyFactor); //zebra fish
+
+        fs_Type = 1.;
     //float wF = length(worleyFactor); //a very interesting...glass...sculpture..?
+        modelposition = u_Model * (vs_Pos + (wF * vs_Nor));
+    }  else if (biome == 2.){
+        //PERLIN NOISE
+        vec3 point = PixelToGrid(vs_Pos.xyz,24.0);
+        float perlin = PerlinNoise(point);
+        vec3 color = vec3(1.0) - vec3(abs(perlin));
+        // vec3 c = max(vec3(0.5), color);
 
-
-    vec4 modelposition = u_Model * (vs_Pos + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below
-
+        if(color.r < 0.8){
+            color = vec3(0.);
+        }
+        modelposition = u_Model * (vs_Pos + (0.2 * color.r * vs_Nor));  
+        fs_Type = 2.;
+    }else {
+        modelposition = u_Model * (vs_Pos);// + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below
+        fs_Type = 3.;
+    }
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
-
+    fs_Col = vs_Col;
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
 }

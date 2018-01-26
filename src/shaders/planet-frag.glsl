@@ -20,12 +20,14 @@ uniform vec2 u_Resolution;
 uniform float u_WorleyScale;
 
 
+
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec3 fs_Pos;
+in float fs_Type;
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
@@ -43,9 +45,9 @@ vec3 random3( vec3 p ) {
 	return r-0.5;
 }
 
-//#define FLOWER
+#define FLOWER
 //#define STRIPED
-#define VORONOI
+//#define VORONOI
 void main()
 {
     vec3 st = fs_Pos;//vec2 st = gl_FragCoord.xy/u_Resolution.xy;
@@ -91,12 +93,25 @@ void main()
     #endif
 
     // Draw grid
-    color.r += step(.98, f_st.x) + step(.98, f_st.y);
+    //color.r += step(.98, f_st.x) + step(.98, f_st.y);
     #ifdef FLOWER
     color = vec3(1.) - color;
-    
-    out_Col = vec4(color,1.0);
+    vec3 colorM = vec3(0.);
+    //out_Col = vec4(1.);
+    if(fs_Type == 1.){
+        //worley
+        colorM = vec3(3.0,1.,1.);
+    } else if (fs_Type == 2.){
+        //
+        colorM = vec3(1.,4.0,1.);
+    } else if (fs_Type == 3.){
+        colorM = vec3(1.,1.,4.0);
+    }
+    vec3 newColor = vec3(min(colorM.r * color.r,1.0),min(colorM.g * color.g,1.), min(colorM.b * color.b, 1.));
+    out_Col = vec4(newColor,1.0);
+    //out_Col = vec4(1.);
     #endif
+
     #ifdef STRIPED
     // Show isolines
     color -= step(.7,abs(sin(27.0*m_dist)))*.5;
@@ -114,7 +129,8 @@ void main()
         //dark violet = 	148-0-211
         stripe = vec3(148. / 255.,0. / 255.,211. / 255.);
     }
-    out_Col = vec4(stripe.rgb * lightIntensity, 1.0);
+
+    out_Col = vec4(stripe.rgb, 1.0);
     #endif
     
 }

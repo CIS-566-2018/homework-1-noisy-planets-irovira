@@ -13,15 +13,17 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
+  tesselations: 6,
   'Load Scene': loadScene, // A function pointer, essentially
   //'test' : test, 
   color: [255.0,0.0,0.0,1.0],
+  worleyScale: .5,
   time: 0.0,
   shader: 'striped',
 };
 
 let icosphere: Icosphere;
+let moon: Icosphere;
 let square: Square;
 let cube: Cube;
 
@@ -29,6 +31,9 @@ let cube: Cube;
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   icosphere.create();
+
+  moon = new Icosphere(vec3.fromValues(5, 0, 0), 1, controls.tesselations);
+  moon.create();
 
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
@@ -51,7 +56,7 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
-
+  gui.add(controls, 'worleyScale', .5, 5).step(0.25);
   gui.addColor(controls, 'color');
   // Choose from accepted values
   gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'striped', 'perlin'] );
@@ -95,16 +100,21 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/perlin-frag.glsl')),
   ]);
 
-  rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
-  striped.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
-  perlin.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+  const planet = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/planet-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/planet-frag.glsl')),
+  ]);
 
-  // const rainbow = new ShaderProgram([
-  //   new Shader(gl.VERTEX_SHADER, require('./shaders/rainbow-vert.glsl')),
-  //   new Shader(gl.FRAGMENT_SHADER, require('./shaders/rainbow-frag.glsl')),
-  // ]);
+  rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+
+  striped.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+  striped.setWorleyScale(controls.worleyScale);
+
+  perlin.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
+  
 
   let currColor: vec4;
+ 
   // This function will be called every frame
   function tick() {
     camera.update();
@@ -112,37 +122,57 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     currColor = vec4.fromValues(controls.color[0] / 255.0, controls.color[1] / 255.0, controls.color[2] / 255.0, controls.color[3]);
+    
+    // perlin.setGeometryColor(currColor);
+    // renderer.render(camera, perlin, [
+    //   icosphere,
+    // ]);
+
+
+      // striped.setWorleyScale(controls.worleyScale);
+      // striped.setGeometryColor(currColor);
+      // renderer.render(camera, striped, [
+      // moon,
+      // ]);
+
+      planet.setWorleyScale(controls.worleyScale);
+      planet.setGeometryColor(currColor);
+      renderer.render(camera, planet, [
+      icosphere,
+      ]);
+
+
     //test.setGeometryColor(currColor);
-    if(controls.shader === 'rainbow'){
-      rainbow.setTime(controls.time);
-      rainbow.setGeometryColor(currColor);
-      renderer.render(camera, rainbow, [
-      //icosphere,
-      //square,
-      cube,
-    ]);
-    } else if(controls.shader === 'lambert'){
-      lambert.setGeometryColor(currColor);
-      renderer.render(camera, lambert, [
-      icosphere,
-      //square,
-      //cube,
-      ]);
-    } else if(controls.shader === 'striped'){
-      striped.setGeometryColor(currColor);
-      renderer.render(camera, striped, [
-      icosphere,
-      //square,
-      //cube,
-      ]);
-    } else if(controls.shader === 'perlin'){
-      perlin.setGeometryColor(currColor);
-      renderer.render(camera, perlin, [
-      icosphere,
-      //square,
-      //cube,
-      ]);
-    }
+    // if(controls.shader === 'rainbow'){
+    //   rainbow.setTime(controls.time);
+    //   rainbow.setGeometryColor(currColor);
+    //   renderer.render(camera, rainbow, [
+    //   //icosphere,
+    //   //square,
+    //   cube,
+    // ]);
+    // } else if(controls.shader === 'lambert'){
+    //   lambert.setGeometryColor(currColor);
+    //   renderer.render(camera, lambert, [
+    //   icosphere,
+    //   //square,
+    //   //cube,
+    //   ]);
+    // } else if(controls.shader === 'striped'){
+    //   striped.setGeometryColor(currColor);
+    //   renderer.render(camera, striped, [
+    //   icosphere,
+    //   //square,
+    //   //cube,
+    //   ]);
+    // } else if(controls.shader === 'perlin'){
+    //   perlin.setGeometryColor(currColor);
+    //   renderer.render(camera, perlin, [
+    //   icosphere,
+    //   //square,
+    //   //cube,
+    //   ]);
+    // }
     
     stats.end();
 
