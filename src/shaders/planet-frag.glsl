@@ -15,7 +15,7 @@ precision highp float;
 
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
-uniform float u_Time;
+//
 uniform vec2 u_Resolution;
 uniform float u_WorleyScale;
 

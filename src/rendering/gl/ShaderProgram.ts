@@ -32,6 +32,7 @@ class ShaderProgram {
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifSpeed: WebGLUniformLocation;
   unifResolution: WebGLUniformLocation;
   unifWorleyScale: WebGLUniformLocation;
 
@@ -55,6 +56,7 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime     = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifSpeed     = gl.getUniformLocation(this.prog, "u_Speed");
     this.unifResolution     = gl.getUniformLocation(this.prog, "u_Resolution");
     this.unifWorleyScale     = gl.getUniformLocation(this.prog, "u_WorleyScale");
   }
@@ -99,6 +101,13 @@ class ShaderProgram {
     this.use();
     if (this.unifTime !== -1) {
       gl.uniform1f(this.unifTime, time);
+    }
+  }
+
+  setSpeed(speed: number) {
+    this.use();
+    if (this.unifSpeed !== -1) {
+      gl.uniform1f(this.unifSpeed, speed);
     }
   }
 

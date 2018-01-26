@@ -21,6 +21,10 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
 
 uniform float u_WorleyScale;
 
+uniform float u_Time;
+
+uniform float u_Speed;
+
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
 in vec4 vs_Nor;             // The array of vertex normals passed to the shader
@@ -36,6 +40,20 @@ out float fs_Type;
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
+
+mat4 rotationMatrix(vec3 axis, float angle)
+{
+    //based on code from: http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
 vec3 random3( vec3 p ) {
     float j = 4096.0*sin(dot(p,vec3(17.0, 59.4, 15.0)));
 	vec3 r = vec3(0.);
@@ -106,6 +124,7 @@ void main()
     fs_Pos = vs_Pos.xyz;                    //pass vertex position to fragment shader
 
     mat3 invTranspose = mat3(u_ModelInvTr);
+
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
                                                             // Transform the geometry's normals by the inverse transpose of the
                                                             // model matrix. This is necessary to ensure the normals remain
@@ -150,6 +169,9 @@ void main()
 
     
     vec4 modelposition = vec4(0.);
+
+    mat4 rot = rotationMatrix(vec3(0.,1.,0.), u_Time * u_Speed);
+    //vec3 rotPos = rot * vs_Pos;
     if (minNeighbor.r == 1. && minNeighbor.b == 0.){
         //PERLIN NOISE
         vec3 point = PixelToGrid(vs_Pos.xyz,24.0);
@@ -160,13 +182,17 @@ void main()
         if(color.r < 0.8){
             color = vec3(0.);
         }
-        modelposition = u_Model * (vs_Pos + (0.2 * color.r * vs_Nor));  
+        modelposition = rot * u_Model * (vs_Pos + (0.2 * color.r * vs_Nor));  
         fs_Type = 2.;
     }else {
-        modelposition = u_Model * (vs_Pos);// + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below
+        modelposition = rot * u_Model * (vs_Pos);// + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below
     }
-    fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
+
+    fs_LightVec = lightPos - (modelposition);  // Compute the direction in which the light source lies
+
     fs_Col = vs_Col;
+
+
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
 }

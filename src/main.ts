@@ -20,6 +20,7 @@ const controls = {
   worleyScale: .5,
   time: 0.0,
   //shader: 'striped',
+  speed: 1.0,
   moonType: 'rock',
 };
 
@@ -58,6 +59,7 @@ function main() {
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
   gui.add(controls, 'worleyScale', .5, 5).step(0.25);
+  gui.add(controls, 'speed', 1, 5).step(0.25);
   //gui.addColor(controls, 'color');
   // Choose from accepted values
   //gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'striped', 'perlin'] );
@@ -146,7 +148,8 @@ function main() {
       // renderer.render(camera, striped, [
       // moon,
       // ]);
-
+      planet.setTime(controls.time);
+      planet.setSpeed(controls.speed);
       planet.setWorleyScale(controls.worleyScale);
       planet.setGeometryColor(currColor);
       renderer.render(camera, planet, [
