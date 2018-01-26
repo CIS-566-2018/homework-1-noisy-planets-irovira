@@ -150,7 +150,7 @@ void main()
 
     
     vec4 modelposition = vec4(0.);
-    if (minNeighbor.r == 1. && minNeighbor.b == 1.){
+    if (minNeighbor.r == 1. && minNeighbor.b == 0.){
         //PERLIN NOISE
         vec3 point = PixelToGrid(vs_Pos.xyz,24.0);
         float perlin = PerlinNoise(point);

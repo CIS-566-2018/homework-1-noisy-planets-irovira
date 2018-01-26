@@ -19,6 +19,7 @@ const controls = {
   color: [255.0,0.0,0.0,1.0],
   worleyScale: .5,
   time: 0.0,
+  //shader: 'striped',
   moonType: 'rock',
 };
 
@@ -57,7 +58,9 @@ function main() {
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
   gui.add(controls, 'worleyScale', .5, 5).step(0.25);
-  gui.addColor(controls, 'color');
+  //gui.addColor(controls, 'color');
+  // Choose from accepted values
+  //gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'striped', 'perlin'] );
   gui.add(controls, 'moonType', [ 'rock', 'ice'] );
 
   // get canvas and webgl context
@@ -165,6 +168,37 @@ function main() {
       
 
 
+    //test.setGeometryColor(currColor);
+    // if(controls.shader === 'rainbow'){
+    //   rainbow.setTime(controls.time);
+    //   rainbow.setGeometryColor(currColor);
+    //   renderer.render(camera, rainbow, [
+    //   //icosphere,
+    //   //square,
+    //   cube,
+    // ]);
+    // } else if(controls.shader === 'lambert'){
+    //   lambert.setGeometryColor(currColor);
+    //   renderer.render(camera, lambert, [
+    //   icosphere,
+    //   //square,
+    //   //cube,
+    //   ]);
+    // } else if(controls.shader === 'striped'){
+    //   striped.setGeometryColor(currColor);
+    //   renderer.render(camera, striped, [
+    //   icosphere,
+    //   //square,
+    //   //cube,
+    //   ]);
+    // } else if(controls.shader === 'perlin'){
+    //   perlin.setGeometryColor(currColor);
+    //   renderer.render(camera, perlin, [
+    //   icosphere,
+    //   //square,
+    //   //cube,
+    //   ]);
+    // }
     
     stats.end();
 

@@ -106,15 +106,15 @@ void main()
         colorM = vec3(135./255.,206./255.,250./255.);
     }
     //205-133-63
-    float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
-        // Avoid negative lighting values
-        // diffuseTerm = clamp(diffuseTerm, 0, 1);
+    // float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+    //     // Avoid negative lighting values
+    //     // diffuseTerm = clamp(diffuseTerm, 0, 1);
 
-    float ambientTerm = 0.3;
+    // float ambientTerm = 0.3;
 
-    float lightIntensity = diffuseTerm + ambientTerm;  
+    // float lightIntensity = diffuseTerm + ambientTerm;  
     vec3 newColor = vec3(min(colorM.r * color.r,1.0),min(colorM.g * color.g,1.), min(colorM.b * color.b, 1.));
-    out_Col = vec4(newColor * lightIntensity,1.0);
+    out_Col = vec4(newColor,1.0);
     //out_Col = vec4(1.);
     #endif
 
