@@ -147,28 +147,10 @@ void main()
             }
         }
     }
-    float biome = 0.;
-    if(minNeighbor.r == 1. && minNeighbor.b == 0.){
-        biome = 2.;
-    } else if (minNeighbor.g == 1. && minNeighbor.b == 1. && minNeighbor.r ==1.){
-        biome = 1.;
-    }
+
     
     vec4 modelposition = vec4(0.);
-
-    if(biome == 1.){
-         // Draw the min distance (distance field)
-        worleyFactor += m_dist;
-
-    // Draw cell center
-        worleyFactor += 1.-step(.02, m_dist); 
-
-        float wF = 1. - length(worleyFactor); //zebra fish
-
-        fs_Type = 1.;
-    //float wF = length(worleyFactor); //a very interesting...glass...sculpture..?
-        modelposition = u_Model * (vs_Pos + (wF * vs_Nor));
-    }  else if (biome == 2.){
+    if (minNeighbor.r == 1. && minNeighbor.b == 1.){
         //PERLIN NOISE
         vec3 point = PixelToGrid(vs_Pos.xyz,24.0);
         float perlin = PerlinNoise(point);
@@ -182,7 +164,6 @@ void main()
         fs_Type = 2.;
     }else {
         modelposition = u_Model * (vs_Pos);// + (wF * vs_Nor));   // Temporarily store the transformed vertex positions for use below
-        fs_Type = 3.;
     }
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
     fs_Col = vs_Col;

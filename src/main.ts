@@ -29,10 +29,10 @@ let cube: Cube;
 
 
 function loadScene() {
-  icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
+  icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1.6, controls.tesselations);
   icosphere.create();
 
-  moon = new Icosphere(vec3.fromValues(5, 0, 0), 1, controls.tesselations);
+  moon = new Icosphere(vec3.fromValues(5, 0, 0), 0.5, controls.tesselations);
   moon.create();
 
   square = new Square(vec3.fromValues(0, 0, 0));
@@ -104,6 +104,10 @@ function main() {
     new Shader(gl.VERTEX_SHADER, require('./shaders/planet-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/planet-frag.glsl')),
   ]);
+  const rock = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/rock-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/rock-frag.glsl')),
+  ]);
 
   rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
 
@@ -139,6 +143,12 @@ function main() {
       planet.setGeometryColor(currColor);
       renderer.render(camera, planet, [
       icosphere,
+      ]);
+
+      rock.setWorleyScale(6.);
+      rock.setGeometryColor(currColor);
+      renderer.render(camera, rock, [
+      moon,
       ]);
 
 

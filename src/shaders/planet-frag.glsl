@@ -98,18 +98,32 @@ void main()
     color = vec3(1.) - color;
     vec3 colorM = vec3(0.);
     //out_Col = vec4(1.);
-    if(fs_Type == 1.){
-        //worley
-        colorM = vec3(3.0,1.,1.);
-    } else if (fs_Type == 2.){
-        //
-        colorM = vec3(1.,4.0,1.);
-    } else if (fs_Type == 3.){
-        colorM = vec3(1.,1.,4.0);
+    if (fs_Type == 2.){
+        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+        // Avoid negative lighting values
+        // diffuseTerm = clamp(diffuseTerm, 0, 1);
+
+        float ambientTerm = 0.2;
+
+        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
+                                                            //to simulate ambient lighting. This ensures that faces that are not
+                                                            //lit by our point light are not completely black.
+
+        // Compute final shaded color
+        out_Col = vec4(vec3(0.,1.,0.) * lightIntensity, 1.);
+    } else {
+        colorM = vec3(0.,1.,2.0);
+        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+        // Avoid negative lighting values
+        // diffuseTerm = clamp(diffuseTerm, 0, 1);
+
+        float ambientTerm = 0.2;
+
+        float lightIntensity = diffuseTerm + ambientTerm;  
+        vec3 newColor = vec3(min(colorM.r * color.r,1.0),min(colorM.g * color.g,1.), min(colorM.b * color.b, 1.));
+        out_Col = vec4(newColor * lightIntensity,1.0);
     }
-    vec3 newColor = vec3(min(colorM.r * color.r,1.0),min(colorM.g * color.g,1.), min(colorM.b * color.b, 1.));
-    out_Col = vec4(newColor,1.0);
-    //out_Col = vec4(1.);
+
     #endif
 
     #ifdef STRIPED
