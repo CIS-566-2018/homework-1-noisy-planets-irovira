@@ -19,7 +19,7 @@ const controls = {
   color: [255.0,0.0,0.0,1.0],
   worleyScale: .5,
   time: 0.0,
-  shader: 'striped',
+  moonType: 'rock',
 };
 
 let icosphere: Icosphere;
@@ -58,8 +58,7 @@ function main() {
   gui.add(controls, 'Load Scene');
   gui.add(controls, 'worleyScale', .5, 5).step(0.25);
   gui.addColor(controls, 'color');
-  // Choose from accepted values
-  gui.add(controls, 'shader', [ 'lambert', 'rainbow', 'striped', 'perlin'] );
+  gui.add(controls, 'moonType', [ 'rock', 'ice'] );
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -104,9 +103,15 @@ function main() {
     new Shader(gl.VERTEX_SHADER, require('./shaders/planet-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/planet-frag.glsl')),
   ]);
+
   const rock = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/rock-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/rock-frag.glsl')),
+  ]);
+
+  const ice = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/ice-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/ice-frag.glsl')),
   ]);
 
   rainbow.setResolution(vec2.fromValues(window.innerWidth, window.innerHeight));
@@ -144,45 +149,22 @@ function main() {
       renderer.render(camera, planet, [
       icosphere,
       ]);
+      if(controls.moonType == 'rock'){
+        rock.setWorleyScale(6.);
+        rock.setGeometryColor(currColor);
+        renderer.render(camera, rock, [
+        moon,
+        ]);
+      } else if (controls.moonType == 'ice'){
+        ice.setWorleyScale(7.);
+        ice.setGeometryColor(currColor);
+        renderer.render(camera, ice, [
+        moon,
+        ]);
+      }
+      
 
-      rock.setWorleyScale(6.);
-      rock.setGeometryColor(currColor);
-      renderer.render(camera, rock, [
-      moon,
-      ]);
 
-
-    //test.setGeometryColor(currColor);
-    // if(controls.shader === 'rainbow'){
-    //   rainbow.setTime(controls.time);
-    //   rainbow.setGeometryColor(currColor);
-    //   renderer.render(camera, rainbow, [
-    //   //icosphere,
-    //   //square,
-    //   cube,
-    // ]);
-    // } else if(controls.shader === 'lambert'){
-    //   lambert.setGeometryColor(currColor);
-    //   renderer.render(camera, lambert, [
-    //   icosphere,
-    //   //square,
-    //   //cube,
-    //   ]);
-    // } else if(controls.shader === 'striped'){
-    //   striped.setGeometryColor(currColor);
-    //   renderer.render(camera, striped, [
-    //   icosphere,
-    //   //square,
-    //   //cube,
-    //   ]);
-    // } else if(controls.shader === 'perlin'){
-    //   perlin.setGeometryColor(currColor);
-    //   renderer.render(camera, perlin, [
-    //   icosphere,
-    //   //square,
-    //   //cube,
-    //   ]);
-    // }
     
     stats.end();
 
